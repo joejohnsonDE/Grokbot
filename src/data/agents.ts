@@ -153,7 +153,7 @@ export const LOG_TEMPLATES: Array<{
     agent: 'SCAN',
     status: 'ACTIVE',
     detail: (c) =>
-      `surfaced ${c} · bonding ${(35 + Math.random() * 55).toFixed(0)}% · refuses nothing on purpose`,
+      `surfaced ${c} on pump.fun · curve ${(35 + Math.random() * 55).toFixed(0)}% · refuses nothing on purpose`,
   },
   {
     action: 'VET',
@@ -161,28 +161,29 @@ export const LOG_TEMPLATES: Array<{
     status: 'KILL',
     detail: (c) =>
       Math.random() > 0.35
-        ? `killed ${c} · same headline ${1 + Math.floor(Math.random() * 3)}× already tonight`
-        : `passed ${c} · story still ahead of the burn`,
+        ? `killed ${c} · same telegram spam ${1 + Math.floor(Math.random() * 3)}× already tonight`
+        : `passed ${c} · social still ahead of the bonding burn`,
   },
   {
     action: 'BOOK',
     agent: 'BOOK',
     status: 'ACTIVE',
     detail: (c) =>
-      `booked ${c} · price has not caught the headline · gap ${(1.2 + Math.random() * 8).toFixed(1)} pts`,
+      `booked ${c} · mcap has not caught the headline · gap ${(1.2 + Math.random() * 8).toFixed(1)}%`,
   },
   {
     action: 'SIZE',
     agent: 'SIZE',
     status: 'ACTIVE',
     detail: (c) =>
-      `sized ${c} · ticket ${WORKING_STAKE_PCT.toFixed(1)}% of bank (cap ${MAX_TICKET_PCT}%) · not own idea`,
+      `sized ${c} · ${(0.05 + Math.random() * 0.35).toFixed(2)} SOL · ${WORKING_STAKE_PCT.toFixed(1)}% of bank (cap ${MAX_TICKET_PCT}%) · not own idea`,
   },
   {
     action: 'FILL',
     agent: 'FILLS',
     status: 'ACTIVE',
-    detail: (c) => `filled ${c} · depth ${(10 + Math.random() * 28).toFixed(0)}k · no chase`,
+    detail: (c) =>
+      `filled ${c} · ${(0.04 + Math.random() * 0.4).toFixed(2)} SOL on curve · no chase`,
     pnl: () => (Math.random() - 0.32) * 110,
   },
   {
@@ -190,7 +191,7 @@ export const LOG_TEMPLATES: Array<{
     agent: 'FILLS',
     status: 'KILL',
     detail: (c) =>
-      `canceled ${c} · book moved ${(3 + Math.random() * 4).toFixed(1)}¢ against · refuse chase`,
+      `canceled ${c} · curve jumped ${(2 + Math.random() * 5).toFixed(1)}% against · refuse chase`,
   },
   {
     action: 'HOLD',
@@ -202,7 +203,8 @@ export const LOG_TEMPLATES: Array<{
     action: 'CLOSE',
     agent: 'RISK',
     status: 'ACTIVE',
-    detail: (c) => `closed ${c} · only RISK can · realized into the bank`,
+    detail: (c) =>
+      `closed ${c} · sold ${(0.05 + Math.random() * 0.5).toFixed(2)} SOL back to curve · only RISK can`,
     pnl: () => (Math.random() - 0.25) * 160,
   },
 ]

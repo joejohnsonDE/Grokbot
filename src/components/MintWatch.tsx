@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function MintWatch({
   mint,
@@ -8,6 +8,12 @@ export function MintWatch({
   onWatch: (mint: string) => void
 }) {
   const [value, setValue] = useState(mint)
+
+  useEffect(() => {
+    setValue(mint)
+  }, [mint])
+
+  const href = mint ? `https://pump.fun/coin/${mint}` : 'https://pump.fun'
 
   return (
     <section className="panel mint-panel">
@@ -27,7 +33,7 @@ export function MintWatch({
           className="mint-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="Token mint address"
+          placeholder="Token mint / CA"
           spellCheck={false}
           aria-label="Token mint address"
         />
@@ -35,7 +41,12 @@ export function MintWatch({
           TRACK
         </button>
       </form>
-      <p className="mint-hint">Agents will bias research / fills toward this CA.</p>
+      <div className="mint-footer">
+        <p className="mint-hint">Seats bias SCAN / FILLS toward this CA · sizes still owned by SIZE.</p>
+        <a className="mint-open" href={href} target="_blank" rel="noreferrer">
+          open on pump.fun ↗
+        </a>
+      </div>
     </section>
   )
 }
