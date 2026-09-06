@@ -4,6 +4,8 @@ import { ActivityLog } from './components/ActivityLog'
 import { EventFeed } from './components/EventFeed'
 import { TradingFloor } from './components/TradingFloor'
 import { AgentPanel } from './components/AgentPanel'
+import { BondingCurve } from './components/BondingCurve'
+import { MintWatch } from './components/MintWatch'
 import { useSimulation } from './hooks/useSimulation'
 import './App.css'
 
@@ -22,6 +24,14 @@ export default function App() {
           <div className="row-top">
             <BalanceChart history={sim.history} />
             <ActivityLog logs={sim.logs} />
+          </div>
+          <div className="row-mid">
+            <BondingCurve
+              coin={sim.activeCoin}
+              progress={sim.curveProgress}
+              mcap={sim.mcap}
+            />
+            <MintWatch mint={sim.mint} onWatch={sim.setMint} />
           </div>
           <EventFeed events={sim.events} />
           <TradingFloor

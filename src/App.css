@@ -236,6 +236,99 @@
   min-height: 260px;
 }
 
+.row-mid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 12px;
+}
+
+.curve-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.curve-track {
+  position: relative;
+  height: 14px;
+  border: 1px solid var(--line-bright);
+  background: #050805;
+  overflow: hidden;
+}
+
+.curve-fill {
+  height: 100%;
+  width: var(--pct);
+  background: linear-gradient(90deg, #1a8f45, var(--green));
+  transition: width 0.6s ease;
+}
+
+.curve-marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--pct);
+  width: 2px;
+  background: #fff;
+  box-shadow: 0 0 8px var(--green);
+  transform: translateX(-1px);
+  transition: left 0.6s ease;
+}
+
+.curve-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.curve-stats .metric-value {
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+.mint-form {
+  display: flex;
+  gap: 8px;
+}
+
+.mint-input {
+  flex: 1;
+  min-width: 0;
+  background: #050805;
+  border: 1px solid var(--line-bright);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.mint-input:focus {
+  border-color: var(--green-dim);
+}
+
+.mint-btn {
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.mint-btn:hover {
+  background: rgba(61, 255, 122, 0.08);
+}
+
+.mint-hint {
+  margin: 8px 0 0;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
 .panel {
   background: linear-gradient(180deg, rgba(12, 22, 16, 0.92), rgba(6, 10, 8, 0.96));
   border: 1px solid var(--line);
@@ -627,7 +720,8 @@
 }
 
 @media (max-width: 800px) {
-  .row-top {
+  .row-top,
+  .row-mid {
     grid-template-columns: 1fr;
     min-height: 0;
   }

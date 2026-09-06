@@ -13,6 +13,7 @@ import type {
 
 const INITIAL = 12010.97
 const DAY = 10
+const DEMO_MINT = 'FatC01nPumpDemo1111111111111111111111111'
 
 function pad(n: number) {
   return n.toString().padStart(2, '0')
@@ -95,6 +96,10 @@ export interface SimulationState {
   logs: ActivityEntry[]
   events: RegionalEvent[]
   candle: number[]
+  mint: string
+  setMint: (mint: string) => void
+  curveProgress: number
+  mcap: number
 }
 
 export function useSimulation(): SimulationState {
@@ -107,6 +112,9 @@ export function useSimulation(): SimulationState {
   const [losses, setLosses] = useState(3)
   const [orders, setOrders] = useState(12)
   const [activeCoin, setActiveCoin] = useState<string>('FATCOIN')
+  const [mint, setMint] = useState(DEMO_MINT)
+  const [curveProgress, setCurveProgress] = useState(62.4)
+  const [mcap, setMcap] = useState(48_200)
   const [uptimeMs, setUptimeMs] = useState(23 * 60_000 + 48_000)
   const [candle, setCandle] = useState(() =>
     Array.from({ length: 24 }, (_, i) => 40 + Math.sin(i / 3) * 18 + Math.random() * 10),
@@ -127,6 +135,10 @@ export function useSimulation(): SimulationState {
 
       setActiveCoin(coin)
       setOrders((o) => o + (tpl.action === 'ORDER' || tpl.action === 'FILL' ? 1 : 0))
+      setCurveProgress((p) =>
+        Math.max(5, Math.min(99, Number((p + (Math.random() - 0.42) * 2.4).toFixed(1)))),
+      )
+      setMcap((m) => Math.max(8_000, Math.round(m + (Math.random() - 0.45) * 1800)))
 
       setAgents((prev) =>
         prev.map((a) => {
@@ -223,5 +235,9 @@ export function useSimulation(): SimulationState {
     logs,
     events,
     candle,
+    mint,
+    setMint,
+    curveProgress,
+    mcap,
   }
 }
