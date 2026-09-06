@@ -6,11 +6,13 @@ import { TradingFloor } from './components/TradingFloor'
 import { AgentPanel } from './components/AgentPanel'
 import { BondingCurve } from './components/BondingCurve'
 import { MintWatch } from './components/MintWatch'
+import { ProtocolPanel } from './components/ProtocolPanel'
 import { useSimulation } from './hooks/useSimulation'
 import './App.css'
 
 export default function App() {
   const sim = useSimulation()
+  const floorAgents = sim.agents.filter((a) => a.trades)
 
   return (
     <div className="app-shell">
@@ -33,9 +35,10 @@ export default function App() {
             />
             <MintWatch mint={sim.mint} onWatch={sim.setMint} />
           </div>
+          <ProtocolPanel />
           <EventFeed events={sim.events} />
           <TradingFloor
-            agents={sim.agents}
+            agents={floorAgents}
             candle={sim.candle}
             activeCoin={sim.activeCoin}
             orders={sim.orders}

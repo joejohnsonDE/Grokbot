@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
 import {
+  DAY_REPORT,
   INITIAL_AGENTS,
   LOG_TEMPLATES,
   PUMP_COINS,
+  WORKING_STAKE_PCT,
 } from '../data/agents'
 import type {
   ActivityEntry,
@@ -10,17 +11,16 @@ import type {
   BalancePoint,
   RegionalEvent,
 } from '../data/agents'
+import { useEffect, useRef, useState } from 'react'
 
-const INITIAL = 12010.97
-const DAY = 10
-const DEMO_MINT = 'FatC01nPumpDemo1111111111111111111111111'
+const INITIAL = DAY_REPORT.open
 
 function pad(n: number) {
   return n.toString().padStart(2, '0')
 }
 
-function nowStamp(elapsedMs: number) {
-  const total = Math.floor(elapsedMs / 1000)
+function stamp(ms: number) {
+  const total = Math.floor(ms / 1000)
   const h = Math.floor(total / 3600) % 24
   const m = Math.floor((total % 3600) / 60)
   const s = total % 60
@@ -36,42 +36,45 @@ function formatUptime(ms: number) {
   return `${m}m ${pad(s)}s`
 }
 
-function seedBalanceHistory(): BalancePoint[] {
+function seedHistory(): BalancePoint[] {
   const pts: BalancePoint[] = []
   let bal = INITIAL
-  for (let i = 0; i < 48; i++) {
-    const spike = i > 30 && i < 38 ? 40 + Math.random() * 80 : (Math.random() - 0.4) * 25
-    bal = Math.max(INITIAL * 0.98, bal + spike)
+  const target = DAY_REPORT.close
+  for (let i = 0; i < 56; i++) {
+    const progress = i / 55
+    const guided = INITIAL + (target - INITIAL) * progress * 0.55
+    const noise = (Math.random() - 0.4) * 45
+    bal = Math.max(INITIAL * 0.985, guided * 0.35 + bal * 0.65 + noise)
     pts.push({ t: i, balance: Number(bal.toFixed(2)) })
+  }
+  pts[pts.length - 1] = {
+    t: pts.length - 1,
+    balance: Number((INITIAL + 369.68).toFixed(2)),
   }
   return pts
 }
 
 function seedLogs(): ActivityEntry[] {
-  const entries: ActivityEntry[] = []
-  for (let i = 0; i < 18; i++) {
-    const tpl = LOG_TEMPLATES[i % LOG_TEMPLATES.length]
-    const agent = tpl.agents[i % tpl.agents.length]
+  return LOG_TEMPLATES.map((tpl, i) => {
     const coin = PUMP_COINS[i % PUMP_COINS.length]
-    const pnl = tpl.pnl ? tpl.pnl() : null
-    entries.push({
+    const pnl = tpl.pnl ? Number(tpl.pnl().toFixed(2)) : null
+    return {
       id: `seed-${i}`,
-      time: nowStamp(i * 47_000 + 12_000),
-      agent,
+      time: stamp(i * 51_000 + 8_000),
+      agent: tpl.agent,
       action: tpl.action,
-      pnl: pnl === null ? null : Number(pnl.toFixed(2)),
+      pnl,
       detail: tpl.detail(coin),
-    })
-  }
-  return entries.reverse()
+    }
+  }).reverse()
 }
 
 function seedEvents(): RegionalEvent[] {
   return [
     { id: 'a1', region: 'AMERICAS', label: 'SOL volume', intensity: 0.9, x: 32, y: 48 },
     { id: 'a2', region: 'AMERICAS', label: 'whale', intensity: 0.55, x: 58, y: 38 },
-    { id: 't1', region: 'ATLANTIC', label: 'listing', intensity: 0.7, x: 48, y: 42 },
-    { id: 't2', region: 'ATLANTIC', label: 'rug watch', intensity: 0.4, x: 62, y: 55 },
+    { id: 't1', region: 'ATLANTIC', label: 'headline', intensity: 0.7, x: 48, y: 42 },
+    { id: 't2', region: 'ATLANTIC', label: 'vet kill', intensity: 0.45, x: 62, y: 55 },
     { id: 'p1', region: 'ASIA / PACIFIC', label: 'launch', intensity: 0.85, x: 55, y: 50 },
     { id: 'p2', region: 'ASIA / PACIFIC', label: 'bundle', intensity: 0.5, x: 70, y: 40 },
   ]
@@ -91,6 +94,7 @@ export interface SimulationState {
   live: boolean
   activeCoin: string
   orders: number
+  stakePct: number
   agents: Agent[]
   history: BalancePoint[]
   logs: ActivityEntry[]
@@ -103,38 +107,42 @@ export interface SimulationState {
 }
 
 export function useSimulation(): SimulationState {
+  const seeded = seedHistory()
   const [agents, setAgents] = useState<Agent[]>(INITIAL_AGENTS)
-  const [history, setHistory] = useState<BalancePoint[]>(seedBalanceHistory)
+  const [history, setHistory] = useState<BalancePoint[]>(seeded)
   const [logs, setLogs] = useState<ActivityEntry[]>(seedLogs)
   const [events, setEvents] = useState<RegionalEvent[]>(seedEvents)
-  const [balance, setBalance] = useState(() => history[history.length - 1]?.balance ?? INITIAL)
+  const [balance, setBalance] = useState(seeded[seeded.length - 1]?.balance ?? INITIAL)
   const [wins, setWins] = useState(3)
   const [losses, setLosses] = useState(3)
   const [orders, setOrders] = useState(12)
-  const [activeCoin, setActiveCoin] = useState<string>('FATCOIN')
-  const [mint, setMint] = useState(DEMO_MINT)
+  const [activeCoin, setActiveCoin] = useState('FATCOIN')
+  const [mint, setMint] = useState('FatC01nPumpDemo1111111111111111111111111')
   const [curveProgress, setCurveProgress] = useState(62.4)
   const [mcap, setMcap] = useState(48_200)
   const [uptimeMs, setUptimeMs] = useState(23 * 60_000 + 48_000)
   const [candle, setCandle] = useState(() =>
     Array.from({ length: 24 }, (_, i) => 40 + Math.sin(i / 3) * 18 + Math.random() * 10),
   )
-  const tick = useRef(history.length)
+  const tick = useRef(seeded.length)
+  const pipeline = useRef(0)
 
   useEffect(() => {
-    const uptimeTimer = window.setInterval(() => {
-      setUptimeMs((v) => v + 1000)
-    }, 1000)
+    const uptimeTimer = window.setInterval(() => setUptimeMs((v) => v + 1000), 1000)
 
     const simTimer = window.setInterval(() => {
-      const tpl = LOG_TEMPLATES[Math.floor(Math.random() * LOG_TEMPLATES.length)]
-      const agentName = tpl.agents[Math.floor(Math.random() * tpl.agents.length)]
+      const ordered = LOG_TEMPLATES
+      const idx =
+        Math.random() > 0.25
+          ? pipeline.current % ordered.length
+          : Math.floor(Math.random() * ordered.length)
+      pipeline.current = (pipeline.current + 1) % ordered.length
+      const tpl = ordered[idx]
       const coin = PUMP_COINS[Math.floor(Math.random() * PUMP_COINS.length)]
-      const pnlRaw = tpl.pnl ? tpl.pnl() : null
-      const pnl = pnlRaw === null ? null : Number(pnlRaw.toFixed(2))
+      const pnl = tpl.pnl ? Number(tpl.pnl().toFixed(2)) : null
 
       setActiveCoin(coin)
-      setOrders((o) => o + (tpl.action === 'ORDER' || tpl.action === 'FILL' ? 1 : 0))
+      if (tpl.action === 'BOOK' || tpl.action === 'FILL') setOrders((o) => o + 1)
       setCurveProgress((p) =>
         Math.max(5, Math.min(99, Number((p + (Math.random() - 0.42) * 2.4).toFixed(1)))),
       )
@@ -142,21 +150,9 @@ export function useSimulation(): SimulationState {
 
       setAgents((prev) =>
         prev.map((a) => {
-          if (a.name === 'TESS') return { ...a, status: 'OFF' }
-          if (a.name === agentName) {
-            const map: Record<string, Agent['status']> = {
-              FILL: 'FILL',
-              SETTLE: 'ACTIVE',
-              RESEARCH: 'SCAN',
-              ORDER: 'ACTIVE',
-              SCAN: 'SCAN',
-              QUOTE: 'ACTIVE',
-            }
-            return { ...a, status: map[tpl.action] ?? 'ACTIVE' }
-          }
-          if (a.status !== 'OFF' && Math.random() > 0.55) {
-            return { ...a, status: 'IDLE' }
-          }
+          if (!a.trades) return { ...a, status: 'HOLD' }
+          if (a.name === tpl.agent) return { ...a, status: tpl.status }
+          if (a.status !== 'IDLE' && Math.random() > 0.5) return { ...a, status: 'IDLE' }
           return a
         }),
       )
@@ -164,8 +160,8 @@ export function useSimulation(): SimulationState {
       setLogs((prev) => {
         const entry: ActivityEntry = {
           id: `live-${Date.now()}`,
-          time: nowStamp(Date.now() % 86_400_000),
-          agent: agentName,
+          time: stamp(Date.now() % 86_400_000),
+          agent: tpl.agent,
           action: tpl.action,
           pnl,
           detail: tpl.detail(coin),
@@ -204,7 +200,7 @@ export function useSimulation(): SimulationState {
           ),
         )
       }
-    }, 2200)
+    }, 2100)
 
     return () => {
       window.clearInterval(uptimeTimer)
@@ -224,12 +220,13 @@ export function useSimulation(): SimulationState {
     wins,
     losses,
     uptime: formatUptime(uptimeMs),
-    day: DAY,
+    day: DAY_REPORT.day,
     trench: 5,
     books: 2,
     live: true,
     activeCoin,
     orders,
+    stakePct: WORKING_STAKE_PCT,
     agents,
     history,
     logs,

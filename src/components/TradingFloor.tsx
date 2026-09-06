@@ -1,7 +1,7 @@
 import type { Agent } from '../data/agents'
 
 function AgentSprite({ agent, x, y }: { agent: Agent; x: number; y: number }) {
-  const offline = agent.status === 'OFF'
+  const offline = !agent.trades
   return (
     <g transform={`translate(${x}, ${y})`} opacity={offline ? 0.35 : 1}>
       {/* desk */}
@@ -58,7 +58,7 @@ export function TradingFloor({
         <h2>Trading Floor</h2>
         <span className="ticker">
           <span className="ticker-scroll">
-            {activeCoin} — {agents.filter((a) => a.status !== 'OFF').length} AGENTS — {orders}{' '}
+            {activeCoin} — {agents.filter((a) => a.trades).length} AGENTS — {orders}{' '}
             ORDERS — pump.fun trench — {activeCoin} —
           </span>
         </span>

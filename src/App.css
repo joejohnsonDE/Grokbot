@@ -431,23 +431,25 @@
   letter-spacing: 0.04em;
 }
 
-.action-fill {
+.action-fill,
+.action-close {
   color: var(--green);
 }
-.action-settle {
+.action-cancel,
+.action-vet {
   color: var(--pink);
 }
-.action-research {
+.action-book {
   color: var(--blue);
 }
-.action-order {
+.action-size {
   color: var(--yellow);
 }
 .action-scan {
   color: #a8d4ff;
 }
-.action-quote {
-  color: #c8f5a0;
+.action-hold {
+  color: #ff9a4d;
 }
 
 .detail {
@@ -665,22 +667,109 @@
 .status-pill.status-idle {
   color: var(--muted);
 }
-.status-pill.status-active,
-.status-pill.status-fill {
+.status-pill.status-active {
   color: var(--green);
   border-color: var(--green-dim);
 }
-.status-pill.status-scan {
-  color: var(--blue);
-  border-color: #1a4a7a;
+.status-pill.status-hold {
+  color: #ff9a4d;
+  border-color: #6a3a1a;
 }
-.status-pill.status-off {
+.status-pill.status-kill {
   color: var(--red);
   border-color: #6a2020;
 }
 
+.agent-rule {
+  margin: 4px 0 6px;
+  font-size: 0.58rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.chief-card {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #4a1a1a;
+  background: rgba(80, 12, 12, 0.28);
+}
+
 .muted-icon {
   color: var(--red);
+}
+
+/* ── Protocol ────────────────────────────────────── */
+
+.protocol-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.protocol-lede,
+.protocol-structure,
+.protocol-footer {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.protocol-lede em,
+.protocol-structure strong {
+  color: var(--text);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.protocol-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.protocol-rules li {
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--muted);
+  padding-left: 0;
+}
+
+.protocol-rules span {
+  display: inline-block;
+  min-width: 46px;
+  margin-right: 8px;
+  color: var(--green);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.protocol-footer {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  color: var(--text);
+}
+
+.protocol-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.protocol-split .metric-label {
+  display: block;
+}
+
+.protocol-split .metric-value {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.95rem;
 }
 
 /* ── Footer ──────────────────────────────────────── */
