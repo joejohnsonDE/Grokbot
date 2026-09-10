@@ -1,32 +1,45 @@
 # The Groktagon
 
-Local **pump.fun** trench command center — multi-seat bonding-curve desk with a live (or simulated) launch feed.
+Local **pump.fun** trench command center — multi-seat bonding-curve desk with wallet sign-in and optional live trading.
 
-## Run
+## Requirements
+
+- Node.js 18+ (20/22 recommended)
+- npm 9+
+- Phantom or Solflare for live trading
+- Optional: `VITE_SOLANA_RPC` (defaults to public Solana mainnet RPC)
+
+## Install
 
 ```bash
+git clone https://github.com/joejohnsonDE/Grokbot.git
+cd Grokbot
+git checkout cursor/groktagon-pumpfun-dashboard-35c0
 npm install
 npm run dev
 ```
 
-## Protocol
+Open the Vite URL (usually `http://localhost:5173`).
 
-One **CHIEF** who never trades + six seats:
+## Sign in (pump.fun)
+
+On first load you’ll see a **Welcome back** gate matching pump.fun’s login options:
+
+1. **Google / Apple / GitHub / email** — opens [pump.fun](https://pump.fun) so **you** complete social login there (app wallet stays with that method)
+2. **Or connect a wallet** — Phantom / Solflare inside Groktagon (required for agents to sign buys/sells)
+
+Then: track a mint → set ticket size → **ARM LIVE** → approve txs in your wallet.
+
+## Protocol
 
 | Seat | Owns |
 |------|------|
-| SCAN | Discovery on pump.fun (refuses nothing on purpose) |
+| CHIEF | Never trades |
+| SCAN | Discovery |
 | VET | Kill filter |
-| BOOK | Only markets where mcap hasn't caught the headline |
-| SIZE | Ticket clamp (6% max · ~2.4% working) |
-| FILLS | Execute / cancel — never chase adverse curve moves |
-| RISK | Only seat that can close |
+| BOOK | Only markets where mcap hasn’t caught the headline |
+| SIZE | Ticket clamp |
+| FILLS | Buys (live when armed) |
+| RISK | Sells / close only |
 
-## pump.fun surfaces
-
-- Bonding curve progress toward PumpSwap graduation
-- Mint / CA watch with direct pump.fun link
-- Launch feed (PumpPortal websocket when available, sim fallback)
-- SOL-denominated size / fill / close logs
-
-Wire real trade execution into `useSimulation` when you're ready — the UI is local and keyless by default.
+Keys never leave your wallet. Groktagon builds pump.fun txs via PumpPortal `trade-local` and you sign them locally.

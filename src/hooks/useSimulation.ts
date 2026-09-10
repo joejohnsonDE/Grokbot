@@ -9,7 +9,9 @@ import type {
   ActivityEntry,
   Agent,
   BalancePoint,
+  LogAction,
   RegionalEvent,
+  SeatName,
 } from '../data/agents'
 import { useEffect, useRef, useState } from 'react'
 
@@ -80,6 +82,21 @@ function seedEvents(): RegionalEvent[] {
   ]
 }
 
+export function isRealMint(mint: string) {
+  return Boolean(mint && mint.length >= 32 && !mint.includes('Demo') && !mint.includes('PumpDemo'))
+}
+
+export interface LiveTradeHooks {
+  /** When true, FILL/CLOSE attempt real trades instead of simulated P&L */
+  enabled: boolean
+  mint: string
+  ticketSol: number
+  onBuy: (mint: string, sol: number) => Promise<{ signature: string } | null>
+  onSell: (mint: string) => Promise<{ signature: string } | null>
+  /** Minimum ms between live trades */
+  cooldownMs?: number
+}
+
 export interface SimulationState {
   balance: number
   initial: number
@@ -92,6 +109,7 @@ export interface SimulationState {
   trench: number
   books: number
   live: boolean
+  tradingLive: boolean
   activeCoin: string
   orders: number
   stakePct: number
@@ -104,9 +122,11 @@ export interface SimulationState {
   setMint: (mint: string) => void
   curveProgress: number
   mcap: number
+  openPosition: boolean
+  pushLog: (entry: Omit<ActivityEntry, 'id' | 'time'> & { time?: string }) => void
 }
 
-export function useSimulation(): SimulationState {
+export function useSimulation(live?: LiveTradeHooks): SimulationState {
   const seeded = seedHistory()
   const [agents, setAgents] = useState<Agent[]>(INITIAL_AGENTS)
   const [history, setHistory] = useState<BalancePoint[]>(seeded)
@@ -117,20 +137,45 @@ export function useSimulation(): SimulationState {
   const [losses, setLosses] = useState(3)
   const [orders, setOrders] = useState(12)
   const [activeCoin, setActiveCoin] = useState('FATCOIN')
-  const [mint, setMint] = useState('FatC01nPumpDemo1111111111111111111111111')
+  const [mint, setMint] = useState('')
   const [curveProgress, setCurveProgress] = useState(62.4)
   const [mcap, setMcap] = useState(48_200)
   const [uptimeMs, setUptimeMs] = useState(23 * 60_000 + 48_000)
+  const [openPosition, setOpenPosition] = useState(false)
   const [candle, setCandle] = useState(() =>
     Array.from({ length: 24 }, (_, i) => 40 + Math.sin(i / 3) * 18 + Math.random() * 10),
   )
   const tick = useRef(seeded.length)
   const pipeline = useRef(0)
+  const lastTradeAt = useRef(0)
+  const tradingLock = useRef(false)
+  const liveRef = useRef(live)
+  liveRef.current = live
+  const mintRef = useRef(mint)
+  mintRef.current = mint
+  const openRef = useRef(openPosition)
+  openRef.current = openPosition
+
+  const pushLog = (entry: Omit<ActivityEntry, 'id' | 'time'> & { time?: string }) => {
+    setLogs((prev) => {
+      const row: ActivityEntry = {
+        id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        time: entry.time ?? stamp(Date.now() % 86_400_000),
+        agent: entry.agent,
+        action: entry.action,
+        pnl: entry.pnl,
+        detail: entry.detail,
+      }
+      return [row, ...prev].slice(0, 80)
+    })
+  }
 
   useEffect(() => {
     const uptimeTimer = window.setInterval(() => setUptimeMs((v) => v + 1000), 1000)
 
     const simTimer = window.setInterval(() => {
+      const liveCfg = liveRef.current
+      const tradingLive = Boolean(liveCfg?.enabled && isRealMint(liveCfg.mint || mintRef.current))
       const ordered = LOG_TEMPLATES
       const idx =
         Math.random() > 0.25
@@ -138,8 +183,11 @@ export function useSimulation(): SimulationState {
           : Math.floor(Math.random() * ordered.length)
       pipeline.current = (pipeline.current + 1) % ordered.length
       const tpl = ordered[idx]
-      const coin = PUMP_COINS[Math.floor(Math.random() * PUMP_COINS.length)]
-      const pnl = tpl.pnl ? Number(tpl.pnl().toFixed(2)) : null
+      const trackedMint = liveCfg?.mint || mintRef.current
+      const coin = tradingLive
+        ? trackedMint.slice(0, 6).toUpperCase()
+        : PUMP_COINS[Math.floor(Math.random() * PUMP_COINS.length)]
+      let pnl = tpl.pnl ? Number(tpl.pnl().toFixed(2)) : null
 
       setActiveCoin(coin)
       if (tpl.action === 'BOOK' || tpl.action === 'FILL') setOrders((o) => o + 1)
@@ -157,19 +205,110 @@ export function useSimulation(): SimulationState {
         }),
       )
 
-      setLogs((prev) => {
-        const entry: ActivityEntry = {
-          id: `live-${Date.now()}`,
-          time: stamp(Date.now() % 86_400_000),
+      // Live autonomous trades: FILLS buys when flat, RISK sells when open
+      const cooldown = liveCfg?.cooldownMs ?? 45_000
+      const canTrade =
+        tradingLive &&
+        liveCfg &&
+        !tradingLock.current &&
+        Date.now() - lastTradeAt.current > cooldown
+
+      if (canTrade && tpl.action === 'FILL' && !openRef.current) {
+        tradingLock.current = true
+        const sol = liveCfg.ticketSol
+        pushLog({
+          agent: 'FILLS',
+          action: 'FILL',
+          pnl: null,
+          detail: `LIVE buy ${sol} SOL · mint ${trackedMint.slice(0, 4)}… — approve in wallet`,
+        })
+        void liveCfg
+          .onBuy(trackedMint, sol)
+          .then((res) => {
+            if (res?.signature) {
+              lastTradeAt.current = Date.now()
+              setOpenPosition(true)
+              setOrders((o) => o + 1)
+              pushLog({
+                agent: 'FILLS',
+                action: 'FILL',
+                pnl: null,
+                detail: `LIVE fill confirmed · https://solscan.io/tx/${res.signature}`,
+              })
+            } else {
+              pushLog({
+                agent: 'FILLS',
+                action: 'CANCEL',
+                pnl: null,
+                detail: `LIVE buy aborted / rejected · staying flat`,
+              })
+            }
+          })
+          .finally(() => {
+            tradingLock.current = false
+          })
+        return
+      }
+
+      if (canTrade && tpl.action === 'CLOSE' && openRef.current) {
+        tradingLock.current = true
+        pushLog({
+          agent: 'RISK',
+          action: 'CLOSE',
+          pnl: null,
+          detail: `LIVE sell 100% · mint ${trackedMint.slice(0, 4)}… — approve in wallet`,
+        })
+        void liveCfg
+          .onSell(trackedMint)
+          .then((res) => {
+            if (res?.signature) {
+              lastTradeAt.current = Date.now()
+              setOpenPosition(false)
+              pushLog({
+                agent: 'RISK',
+                action: 'CLOSE',
+                pnl: null,
+                detail: `LIVE close confirmed · https://solscan.io/tx/${res.signature}`,
+              })
+            } else {
+              pushLog({
+                agent: 'RISK',
+                action: 'HOLD',
+                pnl: null,
+                detail: `LIVE sell aborted / rejected · RISK holds`,
+              })
+            }
+          })
+          .finally(() => {
+            tradingLock.current = false
+          })
+        return
+      }
+
+      // While live-armed, keep desk chatter but skip fake P&L fills/closes
+      if (tradingLive && (tpl.action === 'FILL' || tpl.action === 'CLOSE')) {
+        pushLog({
           agent: tpl.agent,
           action: tpl.action,
-          pnl,
-          detail: tpl.detail(coin),
-        }
-        return [entry, ...prev].slice(0, 60)
+          pnl: null,
+          detail:
+            tpl.action === 'FILL'
+              ? `FILLS idle · cooldown / waiting for flat ticket on tracked mint`
+              : `RISK idle · no open live position to close`,
+        })
+        return
+      }
+
+      pushLog({
+        agent: tpl.agent,
+        action: tpl.action,
+        pnl: tradingLive ? null : pnl,
+        detail: tradingLive
+          ? `${tpl.detail(coin)} · watching ${trackedMint.slice(0, 4)}…`
+          : tpl.detail(coin),
       })
 
-      if (pnl !== null) {
+      if (!tradingLive && pnl !== null) {
         setBalance((b) => {
           const next = Number((b + pnl).toFixed(2))
           tick.current += 1
@@ -211,6 +350,7 @@ export function useSimulation(): SimulationState {
   const pnl = Number((balance - INITIAL).toFixed(2))
   const total = wins + losses
   const winRate = total === 0 ? 0 : Number(((wins / total) * 100).toFixed(1))
+  const tradingLive = Boolean(live?.enabled && isRealMint(live.mint || mint))
 
   return {
     balance,
@@ -224,6 +364,7 @@ export function useSimulation(): SimulationState {
     trench: 5,
     books: 2,
     live: true,
+    tradingLive,
     activeCoin,
     orders,
     stakePct: WORKING_STAKE_PCT,
@@ -236,5 +377,10 @@ export function useSimulation(): SimulationState {
     setMint,
     curveProgress,
     mcap,
+    openPosition,
+    pushLog,
   }
 }
+
+// silence unused type imports in some TS configs
+export type { LogAction, SeatName }

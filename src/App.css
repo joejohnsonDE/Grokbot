@@ -942,3 +942,235 @@
     opacity: 0.2;
   }
 }
+
+
+/* ── Sign-in gate (pump.fun style) ───────────────── */
+.signin-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+}
+.signin-card {
+  width: min(420px, 100%);
+  background: #0b0f0c;
+  border: 1px solid #1e3d2a;
+  padding: 22px 20px 18px;
+  color: #d7eadc;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+}
+.signin-card.pump-login { text-align: center; }
+.signin-pill {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #86efac, #22c55e 55%, #fff);
+  box-shadow: 0 0 24px rgba(61, 255, 122, 0.35);
+}
+.signin-card h2 {
+  margin: 0;
+  font-family: var(--font-display, Orbitron, sans-serif);
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+}
+.signin-kicker {
+  margin: 0 0 6px;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b8f76;
+}
+.signin-copy {
+  margin: 8px 0 18px;
+  color: #6b8f76;
+  font-size: 0.85rem;
+}
+.signin-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+.signin-social-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.signin-social {
+  display: grid;
+  place-items: center;
+  height: 46px;
+  border-radius: 10px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+  text-decoration: none;
+}
+.signin-email {
+  display: grid;
+  grid-template-columns: 1fr 46px;
+  gap: 8px;
+  margin-top: 10px;
+}
+.signin-email input {
+  background: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  color: #ddd;
+  padding: 12px 14px;
+  font: inherit;
+}
+.signin-email button {
+  border: 0;
+  border-radius: 10px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.signin-note {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  text-align: left;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #9aa;
+}
+.signin-divider {
+  display: grid;
+  place-items: center;
+  margin: 16px 0 12px;
+  color: #6b8f76;
+  font-size: 0.72rem;
+}
+.signin-divider span {
+  position: relative;
+  padding: 0 10px;
+}
+.signin-wallet-row {
+  display: flex;
+  justify-content: center;
+}
+.signin-fineprint {
+  margin: 14px 0 0;
+  font-size: 0.65rem;
+  line-height: 1.4;
+  color: #6b8f76;
+  text-align: left;
+}
+.signin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.signin-link {
+  color: #3dff7a;
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+.signin-steps {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  text-align: left;
+  color: #6b8f76;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+/* ── Live desk controls ──────────────────────────── */
+.live-panel .live-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.live-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.72rem;
+}
+.live-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: end;
+}
+.live-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.live-field input {
+  background: #050805;
+  border: 1px solid var(--line-bright, #2a4a35);
+  color: var(--text, #d7eadc);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  padding: 8px 10px;
+}
+.live-arm {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.72rem;
+  color: var(--muted, #6b8f76);
+}
+.live-arm strong { color: #ff4d4d; letter-spacing: 0.06em; }
+.live-arm em { font-style: normal; }
+.live-manual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.live-manual button {
+  background: transparent;
+  border: 1px solid var(--green-dim, #1a8f45);
+  color: var(--green, #3dff7a);
+  font-family: var(--font-display, Orbitron, sans-serif);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.live-manual button.sell {
+  border-color: #6a2020;
+  color: #ff4d4d;
+}
+.live-manual button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.live-status {
+  margin: 8px 0 0;
+  font-size: 0.68rem;
+}
+.live-status a { color: inherit; }
+
+/* wallet adapter button theming */
+.wallet-adapter-button {
+  background-color: #14301c !important;
+  font-family: var(--font-mono, monospace) !important;
+}
