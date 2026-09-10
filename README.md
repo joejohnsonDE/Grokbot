@@ -1,13 +1,13 @@
 # The Groktagon
 
-Local **pump.fun** trench command center — multi-seat bonding-curve desk with wallet sign-in and optional live trading.
+Laptop-friendly **pump.fun** trench command center — seats, wallet sign-in, and AI agents that default to **free local Ollama**.
 
 ## Requirements
 
-- Node.js 18+ (20/22 recommended)
-- npm 9+
-- Phantom or Solflare for live trading
-- Optional: `VITE_SOLANA_RPC` (defaults to public Solana mainnet RPC)
+- Node.js 18+ / npm 9+
+- Modern browser
+- Optional for AI chat: [Ollama](https://ollama.com) on the same laptop
+- Optional for live trades: Phantom/Solflare + SOL
 
 ## Install
 
@@ -19,27 +19,39 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL (usually `http://localhost:5173`).
+### Free AI on this laptop (default)
 
-## Sign in (pump.fun)
+```bash
+# install Ollama, then:
+ollama pull llama3.2
+ollama serve
+```
 
-On first load you’ll see a **Welcome back** gate matching pump.fun’s login options:
+Open the app → **SETTINGS** → provider should be **Ollama (free · local)** → **Test connection**.
 
-1. **Google / Apple / GitHub / email** — opens [pump.fun](https://pump.fun) so **you** complete social login there (app wallet stays with that method)
-2. **Or connect a wallet** — Phantom / Solflare inside Groktagon (required for agents to sign buys/sells)
+## Settings (API keys)
 
-Then: track a mint → set ticket size → **ARM LIVE** → approve txs in your wallet.
+Open **SETTINGS** in the header. Keys are stored only in **browser localStorage** (not git).
 
-## Protocol
+| Provider | Cost | Notes |
+|----------|------|--------|
+| Ollama | Free | Default · runs on your laptop |
+| Gemini | Free tier | Paste API key |
+| Groq | Free tier | Paste API key |
+| OpenRouter | Free models | Paste API key |
+| OpenAI | Paid | Paste API key |
+| Rules only | Free | No LLM calls |
 
-| Seat | Owns |
-|------|------|
-| CHIEF | Never trades |
-| SCAN | Discovery |
-| VET | Kill filter |
-| BOOK | Only markets where mcap hasn’t caught the headline |
-| SIZE | Ticket clamp |
-| FILLS | Buys (live when armed) |
-| RISK | Sells / close only |
+## Agent chat
 
-Keys never leave your wallet. Groktagon builds pump.fun txs via PumpPortal `trade-local` and you sign them locally.
+Use **Agent Comms** to talk to the room. Examples:
+
+- `what's moving?` → CHIEF
+- `@SCAN find fresh pump.fun launches`
+- `@RISK should we hold?`
+
+## Sign in / live trades
+
+1. Welcome gate → social login on pump.fun and/or connect Phantom
+2. Track a mint
+3. **ARM LIVE** for real FILLS/RISK txs (wallet approval required)
