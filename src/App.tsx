@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { MetricsBar } from './components/MetricsBar'
 import { BalanceChart } from './components/BalanceChart'
 import { ActivityLog } from './components/ActivityLog'
@@ -10,14 +10,21 @@ import { MintWatch } from './components/MintWatch'
 import { ProtocolPanel } from './components/ProtocolPanel'
 import { LiveControls } from './components/LiveControls'
 import { SignInGate } from './components/SignInGate'
+import { SettingsMenu } from './components/SettingsMenu'
+import { AgentChat } from './components/AgentChat'
 import { LaunchFeed, usePumpLaunches } from './hooks/usePumpLaunches'
 import { useSimulation } from './hooks/useSimulation'
+import { useSettings } from './hooks/useSettings'
+import { useAgentRuntime } from './hooks/useAgentRuntime'
 import { useLiveTrading } from './wallet/SolanaProviders'
+import { providerLabel } from './lib/settings'
 import './App.css'
 
 export default function App() {
   const wallet = useLiveTrading()
   const { launches, live: feedLive } = usePumpLaunches()
+  const { settings, update, reset } = useSettings()
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const liveHooks = useMemo(
     () => ({
@@ -48,18 +55,36 @@ export default function App() {
   )
 
   const sim = useSimulation(liveHooks)
-  // Keep live mint in sync for the agent loop (ref-updated each render inside the hook)
   liveHooks.mint = sim.mint
 
+  const agents = useAgentRuntime({
+    settings,
+    mint: sim.mint,
+    liveArmed: wallet.liveArmed,
+    activeCoin: sim.activeCoin,
+  })
+
   const floorAgents = sim.agents.filter((a) => a.trades)
+  const brain = settings.agentsEnabled ? providerLabel(settings.provider) : 'rules only'
 
   return (
     <div className="app-shell">
       <div className="scanlines" aria-hidden />
       <div className="grid-bg" aria-hidden />
       <SignInGate />
+      <SettingsMenu
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        settings={settings}
+        update={update}
+        reset={reset}
+      />
 
-      <MetricsBar sim={sim} />
+      <MetricsBar
+        sim={sim}
+        brainLabel={settings.provider}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
 
       <main className="dashboard">
         <div className="col-main">
@@ -89,16 +114,24 @@ export default function App() {
                 })
               }}
             />
+            <AgentChat
+              messages={agents.messages}
+              busy={agents.busy}
+              status={agents.status}
+              error={agents.error}
+              providerLabel={brain}
+              onSend={agents.sendUser}
+            />
+          </div>
+          <div className="row-mid">
             <BondingCurve
               coin={sim.activeCoin}
               progress={sim.curveProgress}
               mcap={sim.mcap}
             />
-          </div>
-          <div className="row-mid">
             <MintWatch mint={sim.mint} onWatch={sim.setMint} />
-            <LaunchFeed launches={launches} live={feedLive} onTrack={sim.setMint} />
           </div>
+          <LaunchFeed launches={launches} live={feedLive} onTrack={sim.setMint} />
           <ProtocolPanel />
           <EventFeed events={sim.events} />
           <TradingFloor
@@ -112,19 +145,15 @@ export default function App() {
       </main>
 
       <footer className="app-foot">
-        <span>GROKBOT · pump.fun</span>
+        <span>GROKBOT · laptop desk</span>
+        <span className="sep">/</span>
+        <span>{brain}</span>
         <span className="sep">/</span>
         <span>{wallet.connected ? 'signed in' : 'sign in with wallet'}</span>
         <span className="sep">/</span>
         <span className={wallet.liveArmed ? 'neg' : feedLive ? 'pos' : ''}>
           {wallet.liveArmed ? 'LIVE ARMED' : feedLive ? 'feed live' : 'sim seats'}
         </span>
-        {sim.openPosition && (
-          <>
-            <span className="sep">/</span>
-            <span className="pos">position open</span>
-          </>
-        )}
       </footer>
     </div>
   )

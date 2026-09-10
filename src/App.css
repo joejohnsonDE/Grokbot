@@ -1174,3 +1174,180 @@
   background-color: #14301c !important;
   font-family: var(--font-mono, monospace) !important;
 }
+
+
+/* ── Settings ────────────────────────────────────── */
+.settings-btn {
+  cursor: pointer;
+  font: inherit;
+  background: rgba(61, 255, 122, 0.08);
+  color: var(--green, #3dff7a);
+}
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+}
+.settings-panel {
+  width: min(520px, 100%);
+  max-height: min(90vh, 760px);
+  overflow: auto;
+  background: #0b120e;
+  border: 1px solid var(--line, #1a2e22);
+  padding: 14px 14px 16px;
+}
+.settings-close {
+  background: transparent;
+  border: 1px solid var(--line-bright, #2a4a35);
+  color: var(--muted, #6b8f76);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.settings-lede {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--muted, #6b8f76);
+}
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+}
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  font-size: 0.68rem;
+  color: var(--muted, #6b8f76);
+}
+.settings-field input,
+.settings-field select {
+  background: #050805;
+  border: 1px solid var(--line-bright, #2a4a35);
+  color: var(--text, #d7eadc);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  padding: 8px 10px;
+}
+.settings-block { margin-top: 4px; }
+.settings-help {
+  margin: 0 0 10px;
+  font-size: 0.65rem;
+  color: var(--muted, #6b8f76);
+  line-height: 1.4;
+}
+.settings-help code {
+  color: var(--green, #3dff7a);
+}
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.settings-actions button {
+  background: transparent;
+  border: 1px solid var(--green-dim, #1a8f45);
+  color: var(--green, #3dff7a);
+  font-family: var(--font-display, Orbitron, sans-serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.settings-actions button.ghost {
+  border-color: var(--line-bright, #2a4a35);
+  color: var(--muted, #6b8f76);
+}
+.settings-actions button:disabled { opacity: 0.45; cursor: not-allowed; }
+.settings-probe {
+  margin: 10px 0 0;
+  font-size: 0.68rem;
+  color: var(--text, #d7eadc);
+  word-break: break-word;
+}
+
+/* ── Agent chat ──────────────────────────────────── */
+.chat-panel { display: flex; flex-direction: column; min-height: 280px; }
+.chat-help {
+  margin: 0 0 8px;
+  font-size: 0.62rem;
+  color: var(--muted, #6b8f76);
+}
+.chat-help code { color: var(--yellow, #f5d547); }
+.chat-log {
+  flex: 1;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--line, #1a2e22);
+  background: #050805;
+  padding: 6px;
+  scrollbar-width: thin;
+}
+.chat-row {
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(26, 46, 34, 0.5);
+  font-size: 0.72rem;
+}
+.chat-row p { margin: 4px 0 0; line-height: 1.4; color: var(--text, #d7eadc); }
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+}
+.chat-row.from-you strong { color: var(--blue, #4da3ff); }
+.chat-row.from-chief strong { color: #ff4d4d; }
+.chat-row.from-scan strong,
+.chat-row.from-vet strong,
+.chat-row.from-book strong,
+.chat-row.from-size strong,
+.chat-row.from-fills strong,
+.chat-row.from-risk strong { color: var(--yellow, #f5d547); }
+.chat-compose {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 8px;
+}
+.chat-compose input {
+  background: #050805;
+  border: 1px solid var(--line-bright, #2a4a35);
+  color: var(--text, #d7eadc);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  padding: 8px 10px;
+}
+.chat-compose button {
+  background: transparent;
+  border: 1px solid var(--green-dim, #1a8f45);
+  color: var(--green, #3dff7a);
+  font-family: var(--font-display, Orbitron, sans-serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.chat-compose button:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.62rem;
+}

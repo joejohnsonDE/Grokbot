@@ -4,7 +4,15 @@ function money(n: number) {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
 
-export function MetricsBar({ sim }: { sim: SimulationState }) {
+export function MetricsBar({
+  sim,
+  brainLabel,
+  onOpenSettings,
+}: {
+  sim: SimulationState
+  brainLabel: string
+  onOpenSettings: () => void
+}) {
   const pnlPositive = sim.pnl >= 0
 
   return (
@@ -63,6 +71,10 @@ export function MetricsBar({ sim }: { sim: SimulationState }) {
           <span className="tag">TRENCH {sim.trench}</span>
           <span className="tag">BOOKS {sim.books}</span>
           <span className="tag accent">{sim.activeCoin}</span>
+          <span className="tag">{brainLabel}</span>
+          <button type="button" className="tag settings-btn" onClick={onOpenSettings}>
+            SETTINGS
+          </button>
         </div>
       </div>
     </header>
