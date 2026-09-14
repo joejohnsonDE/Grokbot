@@ -1,0 +1,45 @@
+:root {
+  --bg: #040706;
+  --bg-elev: #0a110d;
+  --bg-panel: #080e0b;
+  --line: #1a2e22;
+  --line-bright: #2a4a35;
+  --text: #d7eadc;
+  --muted: #6b8f76;
+  --green: #3dff7a;
+  --green-dim: #1a8f45;
+  --red: #ff4d4d;
+  --yellow: #f5d547;
+  --blue: #4da3ff;
+  --pink: #ff6bb5;
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--text);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+  background: var(--bg);
+}
+
+button {
+  font: inherit;
+}
